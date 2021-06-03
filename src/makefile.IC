@@ -30,7 +30,7 @@ CC = gcc
 CCFLAGS = -O2
 
 LIBDIR = $(HOME)/f77/lib
-LIBFLAGS  = -L../lib/JADAMILU_AMD64_4_ifort/JADAMILU/lib -ljadamilu -lblas -llapack -lg2c
+LIBFLAGS  = -L../lib/jadamilu_2.0.tar_IntelProcessor_Ifort_IntegeKind4byte/JADAMILU_2.0/lib/INT64Nifort -ljadamilu -lblas -llapack #-lg2c
 #LIBFLAGS  = -llapack -lblas 
 
 PRINT1 = a2ps -g -o-
