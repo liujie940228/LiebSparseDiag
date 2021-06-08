@@ -1,0 +1,16 @@
+ISeed          = 1234
+Dim            = 3
+Nx             = 1
+NEVals         = 5
+IBCFlag        = 1
+IRNGFlag       = 0
+IKeepFlag      = 0
+IWriteFlag     = 4
+Width0         = 4
+Width1         = 11
+dWidth         = 1
+DiagDis0       = 10.0
+DiagDis1       = 11.0
+dDiagDis       = 1.0
+RimDiagDis     = 0.0001
+Energy         = 0.0D0
