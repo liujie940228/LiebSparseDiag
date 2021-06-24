@@ -64,7 +64,7 @@ SUBROUTINE Input(IErr)
   IErr = 0
   ILine= 0
   
-  OPEN(UNIT= IChInp, ERR=120, FILE= "AMLdiag.inp",STATUS= 'OLD')
+  OPEN(UNIT= IChInp, ERR=120, FILE= "LiebSparsediag.inp",STATUS= 'OLD')
 
   ILine= ILine+1
   READ(IChInp,10,ERR=20) ISeed
@@ -128,7 +128,7 @@ SUBROUTINE Input(IErr)
   
   ILine= ILine+1
   READ(IChInp,15,ERR=20) Energy
-  !PRINT*,"Energy0      = ", Energy0
+  !PRINT*,"Energy      = ", Energy
   
 10 FORMAT(16X,I15.1)
   ! 10	FORMAT("IMAXIteration= ",I15.1)
@@ -139,6 +139,10 @@ SUBROUTINE Input(IErr)
   
   IF(IWriteFlag.GE.2) THEN
      PRINT*,"ISeed        = ", ISeed
+<<<<<<< HEAD
+=======
+     PRINT*,"NSeed        = ", NSeed
+>>>>>>> 8d3bd97cfe12018361d8552d1faa7e8f608465dd
      PRINT*,"Dim          = ", Dim
      PRINT*,"Nx           = ", Nx
      PRINT*,"NEVals       = ", NEVals
@@ -218,7 +222,11 @@ END FUNCTION GetFileName
 !
 ! IErr	error code
 
+<<<<<<< HEAD
 SUBROUTINE CheckOutput( IWidth, Energy, DiagDis, ISeed, IErr )
+=======
+SUBROUTINE CheckOutput( IWidth, Energy, DiagDis, RimDiagDis, ISeed, IErr )
+>>>>>>> 8d3bd97cfe12018361d8552d1faa7e8f608465dd
 
   USE MyNumbers 
   USE IChannels
@@ -227,9 +235,9 @@ SUBROUTINE CheckOutput( IWidth, Energy, DiagDis, ISeed, IErr )
 
   
   INTEGER(KIND=IKIND) IWidth, IErr, ERR, Iseed
-  REAL(KIND=RKIND) DiagDis, Energy
+  REAL(KIND=RKIND) DiagDis, RimDiagDis, Energy
   
-  CHARACTER*28 FileName
+  CHARACTER*58 FileName
   
   !PRINT*,"DBG: CheckOutput()"
   
@@ -237,18 +245,19 @@ SUBROUTINE CheckOutput( IWidth, Energy, DiagDis, ISeed, IErr )
   
   !   WRITE out the input parameter
   IF( Energy .GE. 0.0D0) THEN
-     WRITE(FileName, '(A4,I4.4,A1,I4.4,A1,I4.4,A1,I4.4,A4)') &
-          "Eval",IWidth, "-", &
-          NINT(100.0D0*ABS(Energy)),"-", &
-          NINT(100.0D0*ABS(DiagDis)), "-", &
+     WRITE(FileName, '(A4,A2,I4.4,A5,I4.4,A7,I4.4,A7,I4.4,A1,I4,A4)') &
+          "Eval-M",IWidth,  &
+          "-TarE", NINT(100.0D0*ABS(Energy)), &
+          "-HubDis", NINT(100.0D0*ABS(DiagDis)), &
+          "-RimDis", NINT(100.0D0*ABS(RimDiagDis)), "-",& 
           !Number, "-", &
           ISeed, ".raw"
   ELSE
-     WRITE(FileName, '(A4,I4.4,A2,I4.4,A1,I4.4,A1,I4.4,A4)') &
-          "Eval",IWidth, "-m", &
-          NINT(100.0D0*ABS(Energy)),"-", &
-          NINT(100.0D0*ABS(DiagDis)), "-", &
-          !Number, "-", &
+     WRITE(FileName, '(A4,A2,I4.4,A2,A5,I4.4,A7,I4.4,A7,I4.4,A1,I4,A4)') &
+          "Eval","-M",IWidth, "-m", &
+          "-TarE", NINT(100.0D0*ABS(Energy)), &
+          "-HubDis",NINT(100.0D0*ABS(DiagDis)), "-", &
+          "-RimDis", NINT(100.0D0*ABS(RimDiagDis)), "-",&
           ISeed, ".raw"
   ENDIF
   
@@ -281,8 +290,7 @@ END SUBROUTINE CheckOutput
 !
 ! IErr	error code
 
-SUBROUTINE WriteOutputEVal(NEVals, EIGS, IWidth, Energy, DiagDis, ISeed, IErr)
-
+SUBROUTINE WriteOutputEVal(NEVals, EIGS, IWidth, Energy, DiagDis, RimDiagDis, ISeed, IErr)
 
   USE MyNumbers
   USE IChannels
@@ -291,27 +299,27 @@ SUBROUTINE WriteOutputEVal(NEVals, EIGS, IWidth, Energy, DiagDis, ISeed, IErr)
 
   
   INTEGER(KIND=IKIND) IWidth, IErr, ERR, NEVals, Iseed, i
-  REAL(KIND=RKIND) DiagDis, Energy
+  REAL(KIND=RKIND) DiagDis, RimDiagDis, Energy
   REAL(KIND=RKIND) EIGS(NEVals)
   
-  CHARACTER*28 FileName
+  CHARACTER*58 FileName
   
   IErr= 0
   
   !   WRITE out the input parameter
   IF(Energy.GE.0.0D0) THEN
-     WRITE(FileName, '(A4,I4.4,A1,I4.4,A1,I4.4,A1,I4.4,A4)') &
-          "Eval",IWidth, "-", &
-          NINT(100.0D0*ABS(Energy)),"-", &
-          NINT(100.0D0*ABS(DiagDis)), "-", &
-          !Number, "-", &
+     WRITE(FileName, '(A4,A2,I4.4,A5,I4.4,A7,I4.4,A7,I4.4,A1,I4,A4)') &
+          "Eval","-M",IWidth, &
+          "-TarE", NINT(100.0D0*ABS(Energy)), &
+          "-HubDis", NINT(100.0D0*ABS(DiagDis)), &
+          "-RimDis", NINT(100.0D0*ABS(RimDiagDis)), "-",& 
           ISeed, ".raw"
   ELSE
-     WRITE(FileName, '(A4,I4.4,A2,I4.4,A1,I4.4,A1,I4.4,A4)') &
-          "Eval",IWidth, "-m", &
-          NINT(100.0D0*ABS(Energy)),"-", &
-          NINT(100.0D0*ABS(DiagDis)), "-", &
-          !Number, "-", &
+     WRITE(FileName, '(A4,A2,I4.4,A2,A5,I4.4,A7,I4.4,A7,I4.4,A1,I4,A4)') &
+          "Eval","-M",IWidth, "-m",&
+          "-TarE", NINT(100.0D0*ABS(Energy)), &
+          "-HubDis",NINT(100.0D0*ABS(DiagDis)), "-", &
+          "-RimDis", NINT(100.0D0*ABS(RimDiagDis)), "-",&
           ISeed, ".raw"
   ENDIF
   
@@ -320,9 +328,11 @@ SUBROUTINE WriteOutputEVal(NEVals, EIGS, IWidth, Energy, DiagDis, ISeed, IErr)
   !        ENDIF
   
   OPEN(UNIT= IChEVal, ERR= 10, STATUS='UNKNOWN', FILE=FileName)
+
   DO i=1,NEVals
      WRITE(IChEVal, FMT=15, ERR=20) EIGS(i)
   ENDDO
+  
   CLOSE(UNIT=IChEVal, ERR= 30)
   
   RETURN
@@ -353,13 +363,18 @@ END SUBROUTINE WriteOutputEVal
 ! IErr	error code
 
 SUBROUTINE WriteOutputEVec( Inum, NEVals, Lsize, VECS, VECS_size, &
+<<<<<<< HEAD
                    IWidth, Energy, DiagDis, ISeed, IErr)
+=======
+                   IWidth, Energy, DiagDis, RimDiagDis, Seed, IErr)
+>>>>>>> 8d3bd97cfe12018361d8552d1faa7e8f608465dd
 
   USE MyNumbers
   USE IChannels
 !  USE DPara
 !  USE IPara
 
+<<<<<<< HEAD
   INTEGER(KIND=IKIND) Inum, Iseed, IWidth, IErr, ERR, Lsize, VECS_size, NEVals, i
   REAL(KIND=RKIND) DiagDis, Energy
 
@@ -384,6 +399,33 @@ SUBROUTINE WriteOutputEVec( Inum, NEVals, Lsize, VECS, VECS_size, &
           NINT(100.0D0*ABS(DiagDis)), "-", &
           Inum, "-", &
           ISeed, ".raw"
+=======
+  INTEGER(KIND=IKIND) Inum, Seed, IWidth, IErr, ERR, Lsize, VECS_size, NEVals, i
+  REAL(KIND=RKIND) DiagDis, RimDiagDis, Energy
+
+  REAL(KIND=RKIND) VECS(VECS_size)
+
+  CHARACTER*58 FileName
+
+  IErr= 0
+
+  !   WRITE out the input parameter
+  IF(Energy.GE.0.0D0) THEN
+     WRITE(FileName, '(A4,A2,I4.4,A1,I4.4,A1,I4.4,A1,I4.4,A1,A2,I6,A1,I4.4,A4)') &
+          "Evec","-M",IWidth, "-", &
+          NINT(100.0D0*ABS(Energy)),"-", &
+          NINT(100.0D0*ABS(DiagDis)), "-", &
+          NINT(ABS(DiagDis)),"-", &
+          "N-", Inum, "-", &
+          Seed, ".raw"
+  ELSE
+     WRITE(FileName, '(A4,A2,I4.4,A1,I4.4,A1,I4.4,A1,I4.4,A1,A2,I6,A1,I4.4,A4)') &
+          "Evec","-M",IWidth, "-m", &
+          NINT(100.0D0*ABS(Energy)),"-", &
+          NINT(100.0D0*ABS(DiagDis)), "-", &
+          "N-", Inum, "-", &
+          Seed, ".raw"
+>>>>>>> 8d3bd97cfe12018361d8552d1faa7e8f608465dd
   ENDIF
 
   print*,'evector file ',FileName
@@ -416,3 +458,8 @@ SUBROUTINE WriteOutputEVec( Inum, NEVals, Lsize, VECS, VECS_size, &
   RETURN
 
 END SUBROUTINE WriteOutputEVec
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 8d3bd97cfe12018361d8552d1faa7e8f608465dd
