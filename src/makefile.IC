@@ -36,21 +36,21 @@ LIBFLAGS  = -L../lib/jadamilu_2.0.tar_IntelProcessor_Ifort_IntegeKind4byte/JADAM
 PRINT1 = a2ps -g -o-
 PRINT2 = > AMLdiag.ps # | fleet -odouble
 
-AMLdiag.IC:    CommonModules.o AMLModules.o random.o main.o util.o inout.o etime.o makefile.IC
-	$(F90) $(F90FLAGS) -o AMLdiag.IC CommonModules.o AMLModules.o\
-                util.o main.o inout.o random.o etime.o $(LIBFLAGS)
+LSDdiag.IC:    CommonModules.o LSDModules.o random.o main_LSD.o util.o inout.o etime.o makefile.IC
+	$(F90) $(F90FLAGS) -o LSDdiag.IC CommonModules.o LSDModules.o\
+                util.o main_LSD.o inout.o random.o etime.o $(LIBFLAGS)
 
 CommonModules.o:     CommonModules.f90
 	$(F90) $(F90FLAGS) -c CommonModules.f90
 
-AMLModules.o:     AMLModules.f90
-	$(F90) $(F90FLAGS) -c AMLModules.f90
+LSDModules.o:     LSDModules.f90
+	$(F90) $(F90FLAGS) -c LSDModules.f90
 
 random.o:     random.f90
 	$(F90) $(F90FLAGS) -c random.f90
 
-main.o:     main.f90
-	$(F90) $(F90FLAGS) -c main.f90
+main_LSD.o:     main_LSD.f90
+	$(F90) $(F90FLAGS) -c main_LSD.f90
 
 util.o:     util.f90
 	$(F90) $(F90FLAGS) -c util.f90
@@ -62,13 +62,13 @@ etime.o:     etime.f90
 	$(F90) $(F90FLAGS) -c etime.f90
 
 tar:	AMLdiag.tar	
-AMLdiag.tar:   makefile.* main.f90 util.f90 inout.f90 \
-                random.f90 AMLdiag.inp
-	tar -cvf AMLdiag.tar makefile.* main.f90 util.f90 \
-                inout.f90 random.f90 AMLdiag.inp
+LSDdiag.tar:   makefile.* main_LSD.f90 util.f90 inout.f90 \
+                random.f90 LiebSparsediag.inp
+	tar -cvf LSDdiag.tar makefile.* main_LSD.f90 util.f90 \
+                inout.f90 random.f90 LiebSparsediag.inp
 
 print:  
-	$(PRINT1) AMLdiag.inp main.f90 util.f90 inout.f90 random.f90 $(PRINT2)
+	$(PRINT1) LSDdiag.inp main_LSD.f90 util.f90 inout.f90 random.f90 $(PRINT2)
 
 clean:
 	rm -f core *.mod *.o

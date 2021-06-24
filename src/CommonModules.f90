@@ -87,3 +87,83 @@ END MODULE MyNumbers
 
 
 
+MODULE SETBINS
+
+  USE MyNumbers
+!!$  USE IChannels
+
+  IMPLICIT NONE
+
+CONTAINS
+
+  Subroutine SetbinsforJad(Dim, Nx, IWidth, HubDiagDis, TarStore)
+
+    INTEGER(KIND=IKIND) Dim, Nx, IWidth, EnR
+
+    INTEGER(KIND=IKIND) Nsum, Nflat, Ndisp, Nunit, k, I, IErr
+
+    REAL(KIND=RKIND) HubDiagDis, EngRan
+    INTEGER(KIND=IKIND),Dimension(:,:), ALLOCATABLE:: &
+         TarStore
+
+    Nsum = ( (Nx*Dim)+1 )*(IWidth**Dim)
+    Nflat = (2*Nx)*(IWidth**Dim)
+    Ndisp = Nsum - Nflat
+
+    EngRan = HubDiagDis/2 + 1.0D0
+    EnR = INT(EngRan) + 1 ! +1 insured the eigenvalues are involved
+
+    Nunit = Int(Ndisp/(2*EnR + 1) )
+
+
+    IF(Nx == 1)THEN
+       ! (-EngRan,0) (0,EngRan)
+       ALLOCATE(TarStore(2*EnR, 2),STAT=IErr)
+
+       IF(IErr.NE.0) THEN
+          PRINT*,"CommomModules.f90: Allocate erro, IErr=", IErr
+          STOP
+       ENDIF
+
+       k=1
+       DO I=-EnR, EnR
+          IF(I.NE.0)THEN
+             TarStore(k,1)=I
+             TarStore(k,2)=Nunit
+             k=k+1
+          END IF
+       END DO
+
+    ELSE IF(Nx == 2)THEN
+       ! (-EngRan,-1) (-1,0) (0,1) (1,EngRan)
+       ALLOCATE(TarStore(2*EnR-1, 2),STAT=IErr)
+
+       IF(IErr.NE.0) THEN
+          PRINT*,"CommonModules.f90: Allocate erro, IErr=", IErr
+          STOP
+       END IF
+
+       k=1
+       Do I=-EnR, EnR
+          IF( (I.NE.-1) .OR. (I.NE.1) )THEN
+             TarStore(k,1)=I
+             TarStore(k,2)=Nunit
+             k=k+1
+          END IF
+
+       END DO
+
+    ELSE
+       PRINT*, "Not Finish yet, Erro in inout.f90 of SetbinsforJad()" 
+       STOP
+
+    END IF
+
+    RETURN
+
+    DEALLOCATE(TarStore)
+
+
+  END Subroutine SetbinsforJad
+
+END MODULE SETBINS
