@@ -85,8 +85,6 @@ CONTAINS
 
 END MODULE MyNumbers
 
-
-
 MODULE SETBINS
 
   USE MyNumbers
