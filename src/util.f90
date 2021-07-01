@@ -178,3 +178,18 @@ SUBROUTINE MakeCompactRowLiebMat(Dim, Nx, M, LSize, CSize, iao, jao, ao, nz )
   
 END SUBROUTINE MAKECOMPACTROWLIEBMAT
 
+
+
+!!$SUBROUTINE DetEnergy(Dim, Nx, IWidth, HubDis, Energy)
+!!$
+!!$  INTEGER(KIND=IKIND) Dim, Nx, IWidth
+!!$
+!!$  REAL(KIND=RKIND) HubDis, Energy
+!!$
+!!$  Energy = HubDis/2 + 1.0D0 ! Potensial + hopping
+!!$
+!!$  RETURN
+!!$
+!!$END SUBROUTINE DETENERGY
+
+ 
