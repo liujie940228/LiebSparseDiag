@@ -289,6 +289,10 @@ PROGRAM LiebJADdia
               ICNTL(4)=0
               ICNTL(5)=0
 
+!!$              RES=0
+!!$              VECS=0
+!!$              EIGS=0
+
               ! ----------------------------------------------------------
               !  call to PJD that computes eigenvalues & eigenvectors
 
@@ -299,27 +303,23 @@ PROGRAM LiebJADdia
                    IPRINT, INFO, GAP)
 
               IF(INFO.NE.0) THEN
-                 NEVals= INFO
+                 NEIG= INFO
               END IF
 
-
-              !  CALL PJDCLEANUP   !to be used if you want a new preconditioner in every iteration
+              CALL PJDCLEANUP   !to be used if you want a new preconditioner in every iteration
 
               ! ----------------------------------------------------------
               ! write results into files
               ! ---------------------------------------------------------
-
               
-              
-              DO i=1, NEVals
+              DO i=1, NEIG
                  PRINT*, i, EIGS(i)
               END DO
-
               
               SELECT CASE(IKeepFlag)
 
               CASE(0)
-                 CALL WriteOutputEVal( Dim, Nx, NEVals, EIGS, IWidth, Energy, HubDis, RimDis, Seed, IErr)
+                 CALL WriteOutputEVal( Dim, Nx, NEIG, EIGS, IWidth, Energy, HubDis, RimDis, Seed, IErr)
 !!$                 DO Inum=1, NEVals
 !!$                    CALL WriteOutputEVec( Dim, Nx, Inum, NEVals, Lsize, VECS, VECS_size, &
 !!$                         IWidth, Energy, HubDis, RimDis, Seed, IErr)
@@ -328,9 +328,9 @@ PROGRAM LiebJADdia
               CASE(1)           
                  CALL CheckOutput( IWidth, Energy, HubDis, RimDis, Seed, IErr )
                  IF(IErr.EQ.2) GOTO 100
-                 CALL WriteOutputEVal(NEVals, EIGS, IWidth, Energy, HubDis, RimDis, Seed, IErr,IKeepFlag)
+                 CALL WriteOutputEVal(NEIG, EIGS, IWidth, Energy, HubDis, RimDis, Seed, IErr,IKeepFlag)
                  DO Inum=1,NEVals
-                    CALL WriteOutputEVec( Inum, NEVals, Lsize, VECS, VECS_size, &
+                    CALL WriteOutputEVec( Inum, NEIG, Lsize, VECS, VECS_size, &
                          IWidth, Energy, HubDis, RimDis, Seed, IErr)
                  END DO
 
