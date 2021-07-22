@@ -99,7 +99,8 @@ MODULE DPara
   REAL(KIND=RKIND) :: Energy
   REAL(KIND=RKIND) :: Kappa, MagFlux
   REAL(KIND=RKIND) :: MyEpsilon
-
+  REAL(KIND=RKIND) :: Memory
+  
   REAL(KIND=RKIND), DIMENSION(:,:), ALLOCATABLE :: PsiA, PsiB
 END MODULE DPara
 
