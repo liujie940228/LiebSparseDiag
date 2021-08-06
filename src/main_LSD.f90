@@ -257,18 +257,10 @@ PROGRAM LiebJADdia
 !!$           CLOSE(10)
            
 
-!!$           DO Energy= Energy0, Energy1, dEnergy
-           IF(Energy0 .GT. Energy1)THEN
-              PRINT*, "Error of energy0 and energy1, energy1 should greater than energy0"
-              STOP
-           END IF
+           DO Energy= Energy0, Energy1, dEnergy
            
-           Energy = Energy0   ! The first time to set target energy
-           
-           SugTarE = Energy0
-           
-           DO WHILE(Energy .LE. Energy1)
-           ! ----------------------------------------------------------
+   
+              ! ----------------------------------------------------------
               ! interface to the JADAMILU code
               ! ----------------------------------------------------------
               ! the matrix is already in the required format
@@ -294,7 +286,7 @@ PROGRAM LiebJADdia
               ! desired size of the search space
               MADSPACE=maxsp
               ! maximum number of iteration steps
-              ITER=1000
+              ITER=20000
               ! tolerance for the eigenvector residual
               TOL=1.0d-10
 
@@ -358,24 +350,7 @@ PROGRAM LiebJADdia
                          IWidth, Energy, HubDis, RimDis, Seed, str, IErr)
                  END DO
 
-100           END SELECT
-
-              IF(NEIG .GT. 0) SugTarE = EIGS(NEIG)                 
-                 
-              IF(ABS(SugTarE-Energy) .lt. 0.00001)THEN
-                 Energy = Energy + 0.000005                
-              ELSE IF(ABS(SugTarE-Energy) .lt. 0.0001)THEN
-                 Energy = Energy + 0.00005               
-              ELSE IF(ABS(SugTarE-Energy) .lt. 0.001)THEN               
-                 Energy = Energy + 0.0005                 
-              ELSE IF(ABS(SugTarE-Energy) .lt. 0.01)THEN                 
-                 Energy = Energy + 0.005
-              ELSE IF(ABS(SugTarE-Energy) .lt. 0.1)THEN
-                 Energy = Energy + 0.05
-              ELSE
-                 Energy = Energy + dEnergy
-              END IF
-                                  
+100           END SELECT                                  
              
            END DO !Energy loop
 
