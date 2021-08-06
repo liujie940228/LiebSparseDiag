@@ -297,6 +297,10 @@ PROGRAM LiebJADdia
               ICNTL(4)=0
               ICNTL(5)=0
 
+!!$              RES=0
+!!$              VECS=0
+!!$              EIGS=0
+
               ! ----------------------------------------------------------
               !  call to PJD that computes eigenvalues & eigenvectors
 
@@ -310,7 +314,9 @@ PROGRAM LiebJADdia
               ! When it get the number of eigenvalues is less than NEvals which we set,
               ! it will return the actually number INFO(which included one unconverged)
               IF(INFO.NE.0) THEN
+
                  NEIG= INFO - 1
+
               END IF
 
               CALL PJDCLEANUP   !to be used if you want a new preconditioner in every iteration
@@ -318,8 +324,7 @@ PROGRAM LiebJADdia
               ! ----------------------------------------------------------
               ! write results into files
               ! ---------------------------------------------------------
-
-              
+             
               
               IF(NEIG==0)THEN
                  Print*,"Don't find any eigenvalues!"
@@ -330,12 +335,13 @@ PROGRAM LiebJADdia
                     PRINT*, i, EIGS(i)
                  END DO
               END IF
-
               
               SELECT CASE(IKeepFlag)
 
               CASE(0)
+
                  CALL WriteOutputEVal( Dim, Nx, NEIG, EIGS, IWidth, Energy, HubDis, RimDis, Seed, str, IErr)
+
 !!$                 DO Inum=1, NEVals
 !!$                    CALL WriteOutputEVec( Dim, Nx, Inum, NEIG, Lsize, VECS, VECS_size, &
 !!$                         IWidth, Energy, HubDis, RimDis, Seed, str, IErr)
@@ -344,10 +350,12 @@ PROGRAM LiebJADdia
               CASE(1)           
                  CALL CheckOutput( IWidth, Energy, HubDis, RimDis, Seed, IErr )
                  IF(IErr.EQ.2) GOTO 100
+
                  CALL WriteOutputEVal(NEIG, EIGS, IWidth, Energy, HubDis, RimDis, Seed, IErr, str, IKeepFlag)
                  DO Inum=1,NEVals
                     CALL WriteOutputEVec( Inum, NEIG, Lsize, VECS, VECS_size, &
                          IWidth, Energy, HubDis, RimDis, Seed, str, IErr)
+
                  END DO
 
 100           END SELECT                                  
