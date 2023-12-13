@@ -26,7 +26,6 @@ SUBROUTINE MakeCompactRowLiebMat(Dim, Nx, M, LSize, CSize, iao, jao, ao, nz )
 
   n_uc = M**Dim
   ucl = Dim*Nx + 1
-
   
   IF(Dim==2)THEN
      ALLOCATE(ucl_d(Dim))
@@ -38,7 +37,7 @@ SUBROUTINE MakeCompactRowLiebMat(Dim, Nx, M, LSize, CSize, iao, jao, ao, nz )
      ucl_d(2) = Nx + 2
      ucl_d(3) = 2 * Nx + 2
   ELSE
-     Print*, "We Only Finished the 2D and 3D cases for Lieb model"
+     PRINT*, "ERR: only 2D and 3D cases of Lieb models implemented --- ABORTING"
      STOP
   END IF
 
@@ -53,7 +52,7 @@ SUBROUTINE MakeCompactRowLiebMat(Dim, Nx, M, LSize, CSize, iao, jao, ao, nz )
      ap(0) = ind
      !  Onsite energy term
      iao(ind-1) = ElementsPut    ! Position of diagonal element in the matrix
-     ao(ElementsPut-1) = 0.0D0 !*(DRANDOM(ISeed)-0.5D0) ! Store the onsite energy
+     ao(ElementsPut-1) = 0.0D0   !*(DRANDOM(ISeed)-0.5D0) ! Store the onsite energy
      jao(ElementsPut-1) = ap(0)  ! Store the position of onsite energy
 
      !hopping term
@@ -73,23 +72,24 @@ SUBROUTINE MakeCompactRowLiebMat(Dim, Nx, M, LSize, CSize, iao, jao, ao, nz )
            ap(j+Dim) = (i-1)*ucl + ucl_d(j) + (Nx-1) - ucl*(M)**(j-1)
         END IF
      END DO
-
+     
      DO indhop=1,2*Dim
         IF(ap(indhop).GT.ind)THEN
            ElementsPut = ElementsPut + 1 
-           ao(ElementsPut-1) = 1.0D0    ! Store the hopping energy
+           CALL RANDOM_NUMBER(ao(ElementsPut))
+           ao(ElementsPut) = ao(ElementsPut) + 0.5D0    ! Store the hopping energy
            jao(ElementsPut-1) = ap(indhop)   ! Store the position of hopping energy
         END IF
      END DO
-    
      
      ! ----------------------------- For rim atoms --------------------------!
-
-     ! For rim atoms except close to hub atom of other unit cell 
+ 
      IF(Nx>1)THEN
-        DO k=1, Nx-1
-           
-           DO j=1, Dim
+!!$        DO k=1, Nx-1
+!!$           DO j=1, Dim
+        DO j=1, Dim
+           ! For rim atoms except close to hub atom of other unit cell(inner rim atoms)
+           DO k=1, Nx-1
               
               ind = (i-1)*ucl + ucl_d(j) + k - 1
               ElementsPut = ElementsPut + 1
@@ -110,60 +110,105 @@ SUBROUTINE MakeCompactRowLiebMat(Dim, Nx, M, LSize, CSize, iao, jao, ao, nz )
               DO indhop=1,2
                  IF(bp(indhop).GT.ind)THEN
                     ElementsPut = ElementsPut + 1 
-                    ao(ElementsPut-1) = 1.0D0    ! Store the hopping energy
+                    CALL RANDOM_NUMBER(ao(ElementsPut))
+                    ao(ElementsPut) = ao(ElementsPut) + 0.5D0    ! Store the hopping energy
                     jao(ElementsPut-1) = bp(indhop)   ! Store the position of hopping energy
                  END IF
               END DO
               
            END DO
            
+           ! For rim atoms close to hub atoms in other unit cells(outer rim atoms) 
+           IF(j==1)THEN
+              Flag = ( MOD(i,M**j)==0 )
+           ELSE IF(j==2)THEN
+              Flag = ( MOD(i,M**j)==0 .OR. (MOD(i,M**j).GT.(M**j-M)) )
+           ELSE
+              Flag = ( i.GT.(M**j-M**2) )
+           END IF
+
+           ind = (i-1)*ucl + ucl_d(j) + Nx - 1
+           ElementsPut = ElementsPut + 1
+           !  Onsite energy term
+           bp(0) = ind
+           !  hopping term
+           IF(Nx==1) THEN
+              bp(1) = ind - ucl_d(j) +1
+           ELSE
+              bp(1) = ind - 1
+           END IF
+
+           IF(Flag)THEN
+              !           bp(2)= MOD((i-1)*ucl + ucl*(M)**(j-1) +1,ucl*(M)**j)
+              bp(2)= (i-1)*ucl + 1 - (M-1)*ucl*(M)**(j-1)
+           ELSE
+              !           bp(2)= (i-1)*ucl + 1 + ucl*(M)**(j-1)
+              bp(2)= (i-1)*ucl + 1 + ucl*(M)**(j-1)
+           END IF
+
+           iao(ind-1) = ElementsPut    ! Position of diagonal element in the matrix
+           ao(ElementsPut-1) = 0.0D0 !*(DRANDOM(ISeed)-0.5D0) ! Store the onsite energy
+           jao(ElementsPut-1) = bp(0)  ! Store the position of onsite energy 
+
+           DO indhop=1,2
+              IF(bp(indhop).GT.ind)THEN
+                 ElementsPut = ElementsPut + 1 
+                 CALL RANDOM_NUMBER(ao(ElementsPut))
+                 ao(ElementsPut) = ao(ElementsPut) + 0.5D0    ! Store the hopping energy
+                 jao(ElementsPut-1) = bp(indhop)   ! Store the position of hopping energy
+              END IF
+           END DO
+           
         END DO
         
+     Else if(Nx==1) Then
+    ! For rim atoms close to hub atoms in other unit cells          
+        Do j=1, Dim
+           IF(j==1)THEN
+              Flag = ( MOD(i,M**j)==0 )
+           ELSE IF(j==2)THEN
+              Flag = ( MOD(i,M**j)==0 .OR. (MOD(i,M**j).GT.(M**j-M)) )
+           ELSE
+              Flag = ( i.GT.(M**j-M**2) )
+           END IF
+
+           ind = (i-1)*ucl + ucl_d(j) + Nx - 1
+           ElementsPut = ElementsPut + 1
+           !  Onsite energy term
+           bp(0) = ind
+           !  hopping term
+           IF(Nx==1) THEN
+              bp(1) = ind - ucl_d(j) +1
+           ELSE
+              bp(1) = ind - 1
+           END IF
+
+           IF(Flag)THEN
+              !           bp(2)= MOD((i-1)*ucl + ucl*(M)**(j-1) +1,ucl*(M)**j)
+              bp(2)= (i-1)*ucl + 1 - (M-1)*ucl*(M)**(j-1)
+           ELSE
+              !           bp(2)= (i-1)*ucl + 1 + ucl*(M)**(j-1)
+              bp(2)= (i-1)*ucl + 1 + ucl*(M)**(j-1)
+           END IF
+
+           iao(ind-1) = ElementsPut    ! Position of diagonal element in the matrix
+           ao(ElementsPut-1) = 0.0D0 !*(DRANDOM(ISeed)-0.5D0) ! Store the onsite energy
+           jao(ElementsPut-1) = bp(0)  ! Store the position of onsite energy 
+
+           DO indhop=1,2
+              IF(bp(indhop).GT.ind)THEN
+                 ElementsPut = ElementsPut + 1 
+                 CALL RANDOM_NUMBER(ao(ElementsPut))
+                 ao(ElementsPut) = ao(ElementsPut) + 0.5D0    ! Store the hopping energy
+                 jao(ElementsPut-1) = bp(indhop)   ! Store the position of hopping energy
+              END IF
+           END DO
+
+        END DO
+
      END IF
      
-    ! For rim atoms close to hub atoms in other unit cells  
 
-     DO j=1, Dim
-        IF(j==1)THEN
-           Flag = ( MOD(i,M**j)==0 )
-        ELSE IF(j==2)THEN
-           Flag = ( MOD(i,M**j)==0 .OR. (MOD(i,M**j).GT.(M**j-M)) )
-        ELSE
-           Flag = ( i.GT.(M**j-M**2) )
-        END IF
-        
-        ind = (i-1)*ucl + ucl_d(j) + Nx - 1
-        ElementsPut = ElementsPut + 1
-        !  Onsite energy term
-        bp(0) = ind
-        !  hopping term
-        IF(Nx==1) THEN
-           bp(1) = ind - ucl_d(j) +1
-        ELSE
-           bp(1) = ind - 1
-        END IF
-        
-        IF(Flag)THEN
-!!$           bp(2)= MOD((i-1)*ucl + ucl*(M)**(j-1) +1,ucl*(M)**j)
-           bp(2)= (i-1)*ucl + 1 - (M-1)*ucl*(M)**(j-1)
-        ELSE
-!!$           bp(2)= (i-1)*ucl + 1 + ucl*(M)**(j-1)
-           bp(2)= (i-1)*ucl + 1 + ucl*(M)**(j-1)
-        END IF
-        
-        iao(ind-1) = ElementsPut    ! Position of diagonal element in the matrix
-        ao(ElementsPut-1) = 0.0D0 !*(DRANDOM(ISeed)-0.5D0) ! Store the onsite energy
-        jao(ElementsPut-1) = bp(0)  ! Store the position of onsite energy 
-        
-        DO indhop=1,2
-           IF(bp(indhop).GT.ind)THEN
-              ElementsPut = ElementsPut + 1 
-              ao(ElementsPut-1) = 1.0D0    ! Store the hopping energy
-              jao(ElementsPut-1) = bp(indhop)   ! Store the position of hopping energy
-           END IF
-        END DO
-        
-     END DO
      
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!         
      

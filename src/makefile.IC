@@ -30,8 +30,7 @@ CC = gcc
 CCFLAGS = -O2
 
 LIBDIR = $(HOME)/f77/lib
-LIBFLAGS  = -L../lib/jadamilu_2.0.tar_IntelProcessor_Ifort_IntegeKind4byte/JADAMILU_2.0/lib/INT64Nifort -ljadamilu -lblas -llapack #-lg2c
-#LIBFLAGS  = -llapack -lblas 
+LIBFLAGS = -L$(MKLROOT)/2023.2.0/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl -ljadamilu
 
 PRINT1 = a2ps -g -o-
 PRINT2 = > AMLdiag.ps # | fleet -odouble
